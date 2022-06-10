@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="./style.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <div class="data">
+            <h1>TABLE DATA</h1>
+            <table class="data-table">
+                <thead>
+                    <tr class="col">
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Content</th>
+                        <th>CreateAt</th>
+                        <th>Image</th>
+                        <th>Details</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                           
+                </tbody>
+            </table>
+            <ul id="pagination">
+                <li><i  class="btn-prev bx bx-chevron-left"></i></li>
+                <div id="number-page">
+                    
+                </div>
+                <li><i class="btn-next bx bx-chevron-right"></i></li>
+            </ul>
+            <a href="create.html" class="createLink">Create New</a>
+        </div>
+    </div>
+    <script src="./main.js"></script>
+</body>
+</html>
