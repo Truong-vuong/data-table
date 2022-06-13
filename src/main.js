@@ -1,7 +1,6 @@
 
 let urlBlog = 'https://617b71c2d842cf001711bed9.mockapi.io/api/v1/blogs/';
 
-
 let paginationNumber = document.getElementById('number-page');
 let btnNext = document.querySelector('.btn-next')
 let btnPrev = document.querySelector('.btn-prev')
@@ -18,13 +17,14 @@ let totalPage
 
 function toStart() {
     getBlog(function (blogs) {
-        totalPage = Math.ceil(blogs.length)/perPage;
         renderBlog(blogs);
         renderListPages (blogs);
         changePageNumber(blogs);
         nextPage(blogs);
         prevPage(blogs);
-        handleDelete(blogs)
+
+        handleCreateForm ()
+
     })
 }
 toStart();
@@ -58,7 +58,7 @@ function renderBlog(blogs) {
                 <td>${content}</td>
                 <td>${dateFull}</td>
                 <td><img src="${image}" alt='pic'/></td>
-                <td><button >Details</button></td>
+                <td><button onclick = "handleEdit(${id})">Details</button></td>
                 <td><button>Edit</button></td>
                 <td><button onclick = "handleDelete(${id})">Delete</button></td>
             </tr> `
@@ -72,6 +72,19 @@ function getCurrentPage (currentPage) {
     end = currentPage * perPage;
 
 }
+
+function changePageNumber(blogs) {
+    let currentPages = document.querySelectorAll('#number-page li')
+    for(let i = 0; i < currentPages.length; i++) {
+        currentPages[i].addEventListener('click', function() {
+            let value = i + 1;
+            currentPages = value;
+            currentPage = currentPages
+            getCurrentPage(currentPages)
+            renderBlog(blogs)
+        })
+    }
+ }
 
 function nextPage(blogs) {
     btnNext.addEventListener('click', function() {
@@ -104,32 +117,60 @@ function renderListPages (blogs) {
     }
 }
 
-function changePageNumber(blogs) {
-    let currentPages = document.querySelectorAll('#number-page li')
-    for(let i = 0; i < currentPages.length; i++) {
-        currentPages[i].addEventListener('click', function() {
-            let value = i + 1;
-            currentPages = value;
-            getCurrentPage(currentPages)
+
+
+
+/*-----CRUD----- */
+
+function handleCreateForm () {
+    let createBtn = document.getElementById('create');
+    createBtn.onclick = function () {
+        let id = document.querySelector('input[name="id"]').value;
+        let title = document.querySelector('input[name="title"]').value;
+        let content = document.querySelector('input[name="content"]').value;
+        let createAt = document.querySelector('input[name="createAt"]').value;
+        let image = document.querySelector('input[name="image"]').value;
+        
+        let dataForm = {
+            id:id,
+            title:title,
+            content:content,
+            createAt:createAt,
+            image:image,
+        }
+
+        handleCreate(dataForm);
+        getBlog(function(blogs) {
             renderBlog(blogs)
         })
     }
- }
+}
 
+function handleCreate (data) {
+    let options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+          },
+        body: JSON.stringify(data)
+    }
+    fetch(urlBlog, options)
+        .then(res => res.json())
+        .then(res => {console.log(res)})
+}
 
-function handleDelete (id,blogs) {
-    console.log(blogs);
-    fetch(urlBlog + id, {method: 'DELETE'})
-    .then(res => res.json())
-    .then(res => console.log(res))
+function handleDelete (id) {
+    fetch(urlBlog + id, { method: 'DELETE' })
+        .then(res => res.text())
+        .then(res => {console.log(res)});
 
-    getBlog(function (blogs) {
-        renderBlog(blogs);
-    })
+    // getBlog(function(blogs) {
+         //renderBlog()
+    // })
 }
 
 
- ////////////////////////////////////////////////////////////////
+
 
 
 
