@@ -41,7 +41,7 @@ html {
 
 .col {
     display: grid;
-    grid-template-columns: 30px 220px auto 100px 80px 80px 80px 80px;
+    grid-template-columns: 30px 220px auto 180px 80px 80px 50px 50px;
 }
 
 td,

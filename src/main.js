@@ -1,4 +1,9 @@
-let urlBlog = 'https://my.api.mockaroo.com/datatable.json?key=87f480d0&pageSize=20/';
+// let urlBlog = 'https://617b71c2d842cf001711bed9.mockapi.io/api/v1/blogs/';
+
+let urlBlog = 'https://my.api.mockaroo.com/datatable.json?key=87f480d0';
+let urlPost = 'https://my.api.mockaroo.com/datatable.json?key=87f480d0&__method=POST';
+let urlPut = 'https://my.api.mockaroo.com/datatable/id.json?key=87f480d0&__method=PUT';
+let urlDelete = 'https://my.api.mockaroo.com/datatable.json?key=87f480d0&__method=DELETE';
 
 let paginationNumber = document.getElementById('number-page');
 let btnNext = document.querySelector('.btn-next')
@@ -7,7 +12,7 @@ let btnFist = document.querySelector('.btn-fist')
 let btnLast = document.querySelector('.btn-last')
 
 let currentPage = 1;
-let perPage = 10;
+let perPage = 4;
 let start = 0;
 let end = perPage;
 let totalPage
@@ -18,8 +23,8 @@ let totalPage
 
 function toStart() {
     getBlog(function(blogs) {
-        console.log(blogs);
         renderBlog(blogs);
+        rederPerItem (blogs)
         renderListPages(blogs);
         nextPage(blogs);
         prevPage(blogs);
@@ -38,7 +43,7 @@ function getBlog(callback) {
         })
         .then(callback)
         .catch(function(error) {
-            console.log(error);
+            // console.log(error);
         })
 }
 
@@ -61,8 +66,8 @@ function renderBlog(blogs) {
                 <td class="item-createAt-${id}">${dateFull}</td>
                 <td><img src="${image}" alt='pic' class="item-image-${id}" /></td>
                 <td><button class="btn"onclick = "handleDetails(${id})">Details</button></td>
-                <td><button class="btn btn-blue"onclick = "handleEditForm(${id})">Edit</button></td>
-                <td><button class="btn btn-red"onclick = "handleDelete(${id})">Delete</button></td>
+                <td><button class="btn btn-blue"onclick = "handleEditForm(${id})"><i class='bx bx-edit-alt'></i></button></td>
+                <td><button class="btn btn-red"onclick = "handleDelete(${id})"><i class='bx bx-x'></i></button></td>
             </tr> `
         }
     })
@@ -80,9 +85,24 @@ page.innerHTML = `<p>${currentPage}</p>`
 
 function renderListPages(blogs) {
     totalPage = Math.ceil(blogs.length) / perPage;
-
     for (let i = 0; i < totalPage; i++) {
         paginationNumber.innerHTML += `<option>${i + 1}</option>`
+    }
+}
+
+function rederPerItem (blogs) {
+    let perItem = document.querySelector('.perItem');
+    for(let j= 4; j < 20; j+=4) {
+        perItem.innerHTML += `<option>${j}</option>`
+       }
+    perItem.onchange = function() {
+        let perItemValue = document.querySelector('.perItem').value;
+        perPage = perItemValue;
+        page.innerHTML = `<p>${currentPage}</p>`
+        start = (currentPage - 1) * perPage
+        end = currentPage * perPage;
+        renderBlog(blogs)
+        console.log(perItemValue);
     }
 }
 
@@ -177,7 +197,7 @@ function handleCreate(data) {
         },
         body: JSON.stringify(data)
     }
-    fetch(urlBlog, options)
+    fetch(urlPost, options)
         .then(res => res.json())
         .then(res => {
             console.log(res)
@@ -186,7 +206,7 @@ function handleCreate(data) {
 }
 
 function handleDelete(id) {
-    fetch(urlBlog + id, { method: 'DELETE', })
+    fetch(urlDelete + '/' + id, { method: 'DELETE', })
         .then(res => res.json())
         .then(res => {
             console.log(res)
@@ -210,8 +230,10 @@ function handleEditForm(id) {
     document.querySelector('input[name="image"]').value = document.querySelector('.item-image-'+id).src;
 
     // Lấy Btn Element và đổi tên hiển thị thành "Save"
-    var createBtn = document.querySelector('#create');
+   let createBtn = document.querySelector('#create');
+   let formTitle = document.querySelector('.form-title');
     createBtn.textContent = "Save";
+    formTitle.textContent = "Update Information"
 
     // Hàm bắt sự kiện tại nút "Save"
     createBtn.onclick = function() {
@@ -234,7 +256,7 @@ function handleEditForm(id) {
             },
             body: JSON.stringify(newData)
         };
-        fetch(urlBlog + '/' + id, options)
+        fetch(urlPut + '/' + id, options)
             .then(function(response) {
                 response.json();
             })
@@ -246,7 +268,9 @@ function handleEditForm(id) {
             document.querySelector('.item-createAt-'+id).textContent = createAt;
             document.querySelector('.item-image-'+id).textContent = image;
             // Đổi lại tên nút thành "Create" và xóa các giá trị tại 2 ô Name và Desc
+
             createBtn.textContent = "Create";
+            formTitle.textContent = "Create New Record"
             document.querySelector('input[name="title"]').value = "";
             document.querySelector('input[name="content"]').value = "";
             document.querySelector('input[name="createAt"]').value = "";
