@@ -1,54 +1,21 @@
- import  { handleDelete}  from './modules/delete.js';
+let urlBlog = 'https://617b71c2d842cf001711bed9.mockapi.io/api/v1/blogs';
 
-
- let urlBlog = 'https://617b71c2d842cf001711bed9.mockapi.io/api/v1/blogs';
-
-// let urlBlog = 'https://my.api.mockaroo.com/datatable.json?key=87f480d0';
-// let urlPost = 'https://my.api.mockaroo.com/datatable.json?key=87f480d0&__method=POST';
-// let urlPut = 'https://my.api.mockaroo.com/datatable/id.json?key=87f480d0&__method=PUT';
-// let urlDelete = 'https://my.api.mockaroo.com/datatable.json?key=87f480d0&__method=DELETE';
-
-let paginationNumber = document.getElementById('number-page');
+let loader = document.querySelector('.loader');
 let btnNext = document.querySelector('.btn-next')
 let btnPrev = document.querySelector('.btn-prev');
-let btnFist = document.querySelector('.btn-fist')
+let btnFist = document.querySelector('.btn-fist');
 let btnLast = document.querySelector('.btn-last');
 let btnReload = document.querySelector('.reload');
-let load = document.querySelector('.load')
-let loader = document.querySelector('.loader');
 
 let currentPage = 1;
 let perPage = 10;
 let start = 0;
 let end = perPage;
-let totalPage
-    //start = (currentPage -1) * perPage
-    //end = currentPage * perPage
-    // Example:   page1:currentPage = 1, start = (1-1) * 3 = 0, end = 1* 3 = 3 
-    //page2:currentPage = 2, start = (2-1) * 3 = 3, end = 2* 3 = 6 
+let totalPage;
 
-function toStart() {
-    
-    getBlog(function(blogs) {
-        renderBlog(blogs);
-        rederPerItem (blogs);
-        fresherItem (blogs);
-        reload(blogs)
-        // renderListPages(blogs);
-        nextPage(blogs);
-        prevPage(blogs);
-        fistPage(blogs);
-        lastPage(blogs);
-        handleCreateForm(blogs);
-
-        console.log(typeof handleDelete(blogs));
-        // choosePages(blogs)
-    })
-}
-toStart();
-
- function getBlog(callback) {
-  loader.classList.add('active')
+//Render--------------------
+export function getBlog(callback) {
+    loader.classList.add('active');
     fetch(urlBlog)
         .then(function(response) {
             return response.json();
@@ -60,14 +27,13 @@ toStart();
         .finally(function() {
 
         })
-}
+};
 
-function renderBlog(blogs) {
+export function renderBlog(blogs) {
     let tableBody = document.getElementById('table-body');
     let tableData = '';
     blogs.forEach(function(blog, index) {
         let { id, title, content, createdAt, image } = blog;
-
         let date = new Date(createdAt);
         let dateFull = date.getMonth() + '/' + date.getDate() + '/' + date.getFullYear() + " " +
             date.getHours() + ":" + date.getMinutes()
@@ -79,33 +45,34 @@ function renderBlog(blogs) {
                 <td class="item-title-${id}">${title}</td>
                 <td class="item-content-${id}">${content}</td>
                 <td class="item-createAt-${id}">${dateFull}</td>
-                <td><button class="btn" onclick = "handleDetails(${id})">Details</button></td>
-                <td><button class="btn btn-blue"onclick = "handleEditForm(${id})"><i class='bx bx-edit-alt'></i></button></td>
-                <td><button class="btn btn-red" onclick = "handleDelete(${id})"><i class='bx bx-x'></i></button></td>
+                <td><button class="btn btn-detail" data-detail="${id}">Details</button></td>
+                <td><button class="btn btn-blue btn-edit" data-edit="${id}"><i class='bx bx-edit-alt'></i></button></td>
+                <td><button class="btn btn-red btn-delete " data-id="${id}"><i class='bx bx-x'></i></button></td>
             </tr> `
         }
     })
     tableBody.innerHTML = tableData;
-    loader.classList.remove('active')
-}
+    loader.classList.remove('active');
+    getDataDetails();
+    getDataEdit();
+    getDataDelete();
+};
 
 //Pagination-----------------------
-function getCurrentPage(currentPage) {
-    start = (currentPage - 1) * perPage
-    end = currentPage * perPage;
-}
+export function paginational (blogs) {
+    fresherItem (blogs);
+    renderPerItem(blogs);
+    reloadPerItem(blogs);
+    nextPage(blogs);
+    prevPage(blogs);
+    fistPage(blogs);
+    lastPage(blogs);
+};
 
-let page = document.querySelector('.page');
-page.innerHTML = `<p>${currentPage}</p>`
-
-// function renderListPages(blogs) {
-//     totalPage = Math.ceil(blogs.length) / perPage;
-//     for (let i = 0; i < totalPage; i++) {
-//         paginationNumber.innerHTML += `<option>${i + 1}</option>`
-//     }
-//     let btnReload = document.querySelector('.reload');
-//     btnReload.innerHTML =`<span>${start}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-// }
+export function curerntPageAcitive() {
+    let page = document.querySelector('.page');
+    page.innerHTML = `<p>${currentPage}</p>`
+};
 
 function fresherItem (blogs) {
     let perItem = document.querySelector('.perItem');
@@ -113,36 +80,15 @@ function fresherItem (blogs) {
         let perItemValue = document.querySelector('.perItem').value;
         perPage = perItemValue;
         currentPage =1;
-        page.innerHTML = `<p>${currentPage}</p>`
+        curerntPageAcitive();
         start = (currentPage - 1) * perPage
         end = currentPage * perPage; 
-        load.classList.add('bx-spin')
         renderBlog(blogs)
-        // rederPerItem (blogs)
-        load.classList.remove('bx-spin')
     }
-    
     btnReload.innerHTML =`<span>${start+1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-}
+};
 
-function reloadPerItem(blogs) {
-    currentPage =1;
-    page.innerHTML = `<p>${currentPage}</p>`;
-    let perItemValue = document.querySelector('.perItem').value;
-        perPage = perItemValue;
-    start = (currentPage - 1) * perPage
-    end = currentPage * perPage;
-    btnReload.innerHTML =`<span>${start+1}</span>-<span>${end}</span>/<span>${blogs.length}</span> `
-    load.classList.add('bx-spin')
-    renderBlog(blogs)
-    setTimeout(function () {
-        load.classList.remove('bx-spin')
-    },500)
-
-    fresherItem (blogs);
-}
-
-function rederPerItem (blogs) {
+function renderPerItem(blogs) {
     let perItem = document.querySelector('.perItem');
     for(let j= 10; j <=40; j+=10) {
         perItem.innerHTML += `<option>${j}</option>`
@@ -150,201 +96,98 @@ function rederPerItem (blogs) {
     perItem.onchange = function() {
         let perItemValue = document.querySelector('.perItem').value;
         perPage = perItemValue;
-        currentPage =1;
-        page.innerHTML = `<p>${currentPage}</p>`
-        start = (currentPage - 1) * perPage
+        totalPage = Math.round(Math.ceil(blogs.length) / perPage);
+        currentPage = 1;
+        curerntPageAcitive();
+        start = (currentPage - 1) * perPage;
         end = currentPage * perPage; 
-        load.classList.add('bx-spin')
-        renderBlog(blogs)
-        reloadPerItem(blogs)
+        renderBlog(blogs);
         fresherItem (blogs);
-        load.classList.remove('bx-spin')
     }  
     btnReload.innerHTML =`<span>${start+1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-}
+};
 
-// function choosePages(blogs) {
-//     let numberPage = document.querySelector('#number-page');
-//     numberPage.onchange = function() {
-//         let numberPageValue = document.getElementById('number-page').value;
-//         currentPage = numberPageValue;
-//         page.innerHTML = `<p>${currentPage}</p>`
-//         start = (currentPage - 1) * perPage
-//         end = currentPage * perPage;
-//         renderBlog(blogs)
-//     }
-// }
+function reloadPerItem(blogs) {
+    currentPage =1;
+    curerntPageAcitive();
+    let perItemValue = document.querySelector('.perItem').value;
+    perPage = perItemValue;
+    start = (currentPage - 1) * perPage
+    end = currentPage * perPage;
+    btnReload.innerHTML =`<span>${start+1}</span>-<span>${end}</span>/<span>${blogs.length}</span> `
+    renderBlog(blogs)
+    fresherItem(blogs);
+}
 
 function nextPage(blogs) {
     btnNext.addEventListener('click', function() {
         totalPage = Math.round(Math.ceil(blogs.length) / perPage);
         if (currentPage >= totalPage) {
             currentPage = totalPage;
-            page.innerHTML = `<p>${currentPage}</p>`
-            start = (currentPage - 1) * perPage
-            end = currentPage * perPage;
+            curerntPageAcitive();
+            start = (currentPage - 1) * perPage;
+            end = blogs.length;
             btnReload.innerHTML =`<span>${start+1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-            load.classList.add('bx-spin')
-            renderBlog(blogs)
-            setTimeout(function () {
-                load.classList.remove('bx-spin')
-            },500)
+            renderBlog(blogs);
         }else {
             currentPage++;
-            page.innerHTML = `<p>${currentPage}</p>`
+            curerntPageAcitive();
             start = (currentPage - 1) * perPage
             end = currentPage * perPage;
             btnReload.innerHTML =`<span>${start+1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-            load.classList.add('bx-spin')
-            renderBlog(blogs)
-            setTimeout(function () {
-                load.classList.remove('bx-spin')
-            },500)
+            renderBlog(blogs);
         }    
     })
-}
+};
 
 function prevPage(blogs) {
     btnPrev.addEventListener('click', function() {
         if (currentPage <= 1) {
             currentPage = 1;
-            start = (currentPage - 1) * perPage
+            start = (currentPage - 1) * perPage;
             end = currentPage * perPage;
-            load.classList.add('bx-spin')
-            renderBlog(blogs)
-            setTimeout(function () {
-                load.classList.remove('bx-spin')
-            },500)
+            renderBlog(blogs);
         }else {
             currentPage--;
-            page.innerHTML = `<p>${currentPage}</p>`
+            curerntPageAcitive();
             start = (currentPage - 1) * perPage
             end = currentPage * perPage;
             btnReload.innerHTML =`<span>${start +1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-            load.classList.add('bx-spin')
-            renderBlog(blogs)
-            setTimeout(function () {
-                load.classList.remove('bx-spin')
-            },500)
+            renderBlog(blogs);
         }
     })
-}
+};
 
 function fistPage(blogs) {
     btnFist.addEventListener('click', function() {
         currentPage = 1;
-        page.innerHTML = `<p>${currentPage}</p>`
+        curerntPageAcitive();
         start = (currentPage - 1) * perPage
         end = currentPage * perPage;
         btnReload.innerHTML =`<span>${start+1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-        load.classList.add('bx-spin')
-            renderBlog(blogs)
-            setTimeout(function () {
-                load.classList.remove('bx-spin')
-            },500)
+        renderBlog(blogs);
     })
-}
+};
 
 function lastPage(blogs) {
     btnLast.addEventListener('click', function() {
-        switch (perPage) {
-            case 10:
-                totalPage = Math.round(Math.ceil(blogs.length) / 10);
-                currentPage = totalPage;
-                page.innerHTML = `<p>${currentPage}</p>`
-                start = (currentPage - 1) * perPage
-                end = currentPage * perPage;
-                btnReload.innerHTML =`<span>${start +1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-                load.classList.add('bx-spin')
-                renderBlog(blogs)
-                setTimeout(function () {
-                    load.classList.remove('bx-spin')
-                },500)
-                break;
-             case 20:
-                totalPage = Math.round(Math.ceil(blogs.length) / 20);
-                currentPage = totalPage;
-                page.innerHTML = `<p>${currentPage}</p>`
-                start = (currentPage - 1) * perPage
-                end = currentPage * perPage;
-                btnReload.innerHTML =`<span>${start +1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-                load.classList.add('bx-spin')
-                renderBlog(blogs)
-                setTimeout(function () {
-                    load.classList.remove('bx-spin')
-                },500)
-                break;
-             case 30:
-                totalPage = Math.round(Math.ceil(blogs.length) / 30);
-                currentPage = totalPage;
-                page.innerHTML = `<p>${currentPage}</p>`
-                start = (currentPage - 1) * perPage
-                end = currentPage * perPage;
-                btnReload.innerHTML =`<span>${start +1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-                load.classList.add('bx-spin')
-                renderBlog(blogs)
-                setTimeout(function () {
-                    load.classList.remove('bx-spin')
-                },500)
-                break;
-             case 40:
-                totalPage = Math.round(Math.ceil(blogs.length) / 40);
-                currentPage = totalPage;
-                page.innerHTML = `<p>${currentPage}</p>`
-                start = (currentPage - 1) * perPage
-                end = currentPage * perPage;
-                btnReload.innerHTML =`<span>${start +1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-                load.classList.add('bx-spin')
-            renderBlog(blogs)
-            setTimeout(function () {
-                load.classList.remove('bx-spin')
-            },500)
-                break;
-            default:
-                break;
-        }
         totalPage = Math.round(Math.ceil(blogs.length) / perPage);
         currentPage = totalPage;
-        page.innerHTML = `<p>${currentPage}</p>`
+        curerntPageAcitive();
         start = (currentPage - 1) * perPage
-        end = currentPage * perPage;
-        btnReload.innerHTML =`<span>${start +1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
-        load.classList.add('bx-spin')
-        renderBlog(blogs)
-        setTimeout(function () {
-            load.classList.remove('bx-spin')
-        },500)
+        end = blogs.length;
+        btnReload.innerHTML =`<span>${start+1}</span>-<span>${end}</span>/<span>${blogs.length}</span>`
+        renderBlog(blogs);
     })
-}
+};
 
-function reload(blogs) {
-    btnReload.addEventListener('click',function () {
-        currentPage =1;
-        page.innerHTML = `<p>${currentPage}</p>`
-        start = (currentPage - 1) * perPage
-        end = currentPage * perPage;
-        btnReload.innerHTML =`<span>${start+1}</span>-<span>${end}</span>/<span>${blogs.length}</span> `
-        load.classList.add('bx-spin')
-        renderBlog(blogs)
-        setTimeout(function () {
-            load.classList.remove('bx-spin')
-        },500)
-
-        getBlog(function(blogs) {
-            renderBlog(blogs);
-            fresherItem (blogs);
-        })
-    })
-}
-
-/*-----CRUD----- */
-function handleCreateForm(blogs) {
+//CRUD data API -----------------
+export function handleCreateForm() {
     document.querySelector('.pic').style.display = 'none';
     document.querySelector('input[name="image"]').style.display = 'block';
     let createBtn = document.getElementById('create');
     createBtn.onclick = function(e) {
         e.preventDefault();
-        // let id = document.querySelector('input[name="id"]').value;
         let title = document.querySelector('input[name="title"]').value;
         let content = document.querySelector('input[name="content"]').value;
         let createAt = document.querySelector('input[name="createAt"]').value;
@@ -357,12 +200,12 @@ function handleCreateForm(blogs) {
             createAt: createAt,
         }
         handleCreate(dataForm);
-
         title='';
-        content=""
-        
+        content="";
+        createAt='';
+        image='';     
     }
-}
+};
 
 function handleCreate(data) {
     let options = {
@@ -373,50 +216,60 @@ function handleCreate(data) {
         body: JSON.stringify(data)
     }
     fetch(urlBlog, options)
-        .then(res => res.json())
+        .then(response => response.json())
         .then(res => {
           return  getBlog(function(blogs) {
-                renderBlog(blogs);
-                fresherItem (blogs);
+                    renderBlog(blogs);
+                    fresherItem (blogs);
             })
         })
-}
+};
 
+export function getDataDelete() {
+    let btnDelete = document.querySelectorAll('.btn-delete');
+    btnDelete.forEach(function(item,index) {
+        let deleteId = item.getAttribute("data-id");
+        item.addEventListener("click", function() {
+        handleDelete(deleteId);
+       })
+    })   
+};
 
-// function handleDelete(id) {
-//     fetch(urlBlog + '/' + id, { method: 'DELETE', })
-//         .then(res => res.json())
-//         .then(res => {
-//             //update DOM
-//             // console.log(res)
-//             // let blogItem = document.querySelector('.blog-item-' + id);
-//             // console.log(blogItem);
-//             // if (blogItem) {
-//             //     blogItem.remove();
-//             // }
+function handleDelete(id) {
+    fetch(urlBlog + '/' + id, { method: 'DELETE', })
+    .then(res => res.json())
+    .then(res => { 
+        console.log(res);
+        getBlog(function(blogs) {
+            renderBlog(blogs);
+            fresherItem (blogs);
+        })
+    })  
+};
 
-//             //call API 
-//             getBlog(function(blogs) {
-//                 renderBlog(blogs);
-//                 fresherItem (blogs);
-//         })
-//     });
-// }
+export function getDataEdit() {
+    let btnEdit = document.querySelectorAll('.btn-edit');
+    btnEdit.forEach(function(item,index) {
+        let editId = item.getAttribute("data-edit");
+        item.addEventListener("click", function() {
+        handleEdit(editId);
+       })
+    })   
+};
 
-///////////////////
-function handleEditForm(id) {
+function handleEdit(id) {
     document.querySelector('input[name="title"]').value = document.querySelector('.item-title-'+id).textContent;
     document.querySelector('input[name="content"]').value = document.querySelector('.item-content-'+id).textContent;
     document.querySelector('input[name="createAt"]').value = document.querySelector('.item-createAt-'+id).textContent;
-    document.querySelector('input[name="image"]').value = document.querySelector('.item-image-'+id).src;
+    // document.querySelector('input[name="image"]').value = document.querySelector('.item-image-'+id).src;
 
-    // Lấy Btn Element và đổi tên hiển thị thành "Save"+********
-   let createBtn = document.querySelector('#create');
-   let formTitle = document.querySelector('.form-title');
-   document.querySelector('.pic').style.display = 'none';
-   document.querySelector('input[name="image"]').style.display = 'block';
+    //Lấy Btn Element và đổi tên hiển thị thành "Save"+********
+    let createBtn = document.querySelector('#create');
+    let formTitle = document.querySelector('.form-title');
+    document.querySelector('.pic').style.display = 'none';
+    document.querySelector('input[name="image"]').style.display = 'block';
     createBtn.textContent = "Save";
-    formTitle.textContent = "Update Information"
+    formTitle.textContent = "Update Information";
 
     // Hàm bắt sự kiện tại nút "Save"
     createBtn.onclick = function(e) {
@@ -442,16 +295,8 @@ function handleEditForm(id) {
         };
     
         fetch(urlBlog+'/'+ id, options)
-        .then(function(response) {
-            response.json();
-        })
-        .then((json) => {
-            //update DOM
-            // document.querySelector('.item-title-'+id).textContent = title;
-            // document.querySelector('.item-content-'+id).textContent = content;
-            // document.querySelector('.item-createAt-'+id).textContent = createAt;
-            // // document.querySelector('.item-image-'+id).textContent = image;
-
+            .then(response => response.json())
+            .then((json) => {
             // Đổi lại tên nút thành "Create" và xóa các giá trị tại các ô input
             createBtn.textContent = "Create";
             formTitle.textContent = "Create New Record"
@@ -459,21 +304,29 @@ function handleEditForm(id) {
             document.querySelector('input[name="content"]').value = "";
             document.querySelector('input[name="createAt"]').value = "";
             document.querySelector('input[name="image"]').value = "";
-          
             //Call API
             getBlog(function(blogs) {
                 renderBlog(blogs);
                 fresherItem (blogs);
             })
-         
             // Gọi lại hàm handleCreateForm để trả lại chức năng cho nút "Create"
             handleCreateForm()
         })
     }
-}
+};
 
-let details = document.querySelector('.details');
+export function getDataDetails() {
+    let btnDetail = document.querySelectorAll('.btn-detail');
+    btnDetail.forEach(function(item,index) {
+        let detailId = item.getAttribute("data-detail");
+        item.addEventListener("click", function() {
+        handleDetails(detailId);
+       })
+    })   
+};
+
 function handleDetails(id) {
+    let details = document.querySelector('.details');
     fetch(urlBlog + '/' + id)
         .then(res=> res.json())
         .then(blog=> {
@@ -483,32 +336,43 @@ function handleDetails(id) {
                 date.getHours() + ":" + date.getMinutes()
 
            let dataDetail
-          dataDetail = ` 
-           <div class="blog-detail-${id}">
+            dataDetail = ` 
+            <div class="blog-detail-${id}">
                <div><label class=lable>Title</label>: ${id}</div>
                <div class="item-title-${id}"><label class=lable>Title</label>: ${title}</div>
                <div class="item-content-${id}"><label class=lable>Content</label>: ${content}</div>
                <div class="item-createAt-${id}"><label class=lable>Created At</label>: ${dateFull}</div>
                <div class="imageDetail" ><label class=lable>Pictures</label>: <img class="item-image-${id} img-detail" src=${image}/></div>
-           </div> `
-           details.innerHTML = dataDetail
+            </div> `
+            details.innerHTML = dataDetail
         })
-//     document.querySelector('input[name="title"]').value = document.querySelector('.item-title-'+id).textContent;
-//     document.querySelector('input[name="content"]').value = document.querySelector('.item-content-'+id).textContent;
-//     document.querySelector('input[name="createAt"]').value = document.querySelector('.item-createAt-'+id).textContent;
-//     document.querySelector('input[name="image"]').value = document.querySelector('.item-image-'+id).src;
-//     document.querySelector('input[name="image"]').style.display = 'none';
-//     document.querySelector('.pic').style.display = 'block';
-//     document.querySelector('.pic').src = document.querySelector('.item-image-'+id).src;
+};
 
-//     // Lấy Btn Element và đổi tên hiển thị thành "Save"+********
-//    let createBtn = document.querySelector('#create').disabled ;
-//    let formTitle = document.querySelector('.form-title');
+export function reload(blogs) {
+    btnReload.addEventListener('click',function () {
+        currentPage =1;
+        curerntPageAcitive();
+        start = (currentPage - 1) * perPage
+        end = currentPage * perPage;
+        btnReload.innerHTML =`<span>${start+1}</span>-<span>${end}</span>/<span>${blogs.length}</span> `
+        getBlog(function(blogs) {
+            renderBlog(blogs);
+            fresherItem (blogs);
+        })
+    })
+};
 
-//     formTitle.textContent = "Details";
-
-}
-handleDelete()
-
- export { getBlog, urlBlog, renderBlog, fresherItem } 
-
+export function translate() {
+    let btnTrans = document.querySelector('.trans-create');
+    btnTrans.addEventListener('click', function(e) {
+        let createBtn = document.querySelector('#create');
+        let formTitle = document.querySelector('.form-title');
+        createBtn.textContent = "Create";
+        formTitle.textContent = "Create New Record";
+        handleCreateForm();
+        document.querySelector('input[name="title"]').value = "";
+        document.querySelector('input[name="content"]').value = "";
+        document.querySelector('input[name="createAt"]').value = "";
+        document.querySelector('input[name="image"]').value = "";
+    })
+};
