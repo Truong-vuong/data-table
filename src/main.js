@@ -1,3 +1,6 @@
+ import  { handleDelete}  from './modules/delete.js';
+
+
  let urlBlog = 'https://617b71c2d842cf001711bed9.mockapi.io/api/v1/blogs';
 
 // let urlBlog = 'https://my.api.mockaroo.com/datatable.json?key=87f480d0';
@@ -37,12 +40,14 @@ function toStart() {
         fistPage(blogs);
         lastPage(blogs);
         handleCreateForm(blogs);
+
+        console.log(typeof handleDelete(blogs));
         // choosePages(blogs)
     })
 }
 toStart();
 
-function getBlog(callback) {
+ function getBlog(callback) {
   loader.classList.add('active')
     fetch(urlBlog)
         .then(function(response) {
@@ -74,7 +79,6 @@ function renderBlog(blogs) {
                 <td class="item-title-${id}">${title}</td>
                 <td class="item-content-${id}">${content}</td>
                 <td class="item-createAt-${id}">${dateFull}</td>
-                <td ><img class="item-image-${id} image-hide" src=${image}/></td>
                 <td><button class="btn" onclick = "handleDetails(${id})">Details</button></td>
                 <td><button class="btn btn-blue"onclick = "handleEditForm(${id})"><i class='bx bx-edit-alt'></i></button></td>
                 <td><button class="btn btn-red" onclick = "handleDelete(${id})"><i class='bx bx-x'></i></button></td>
@@ -137,7 +141,6 @@ function reloadPerItem(blogs) {
 
     fresherItem (blogs);
 }
-
 
 function rederPerItem (blogs) {
     let perItem = document.querySelector('.perItem');
@@ -379,34 +382,33 @@ function handleCreate(data) {
         })
 }
 
-function handleDelete(id) {
-    fetch(urlBlog + '/' + id, { method: 'DELETE', })
-        .then(res => res.json())
-        .then(res => {
-            //update DOM
-            // console.log(res)
-            // let blogItem = document.querySelector('.blog-item-' + id);
-            // console.log(blogItem);
-            // if (blogItem) {
-            //     blogItem.remove();
-            // }
 
-            //call API 
-            getBlog(function(blogs) {
-                renderBlog(blogs);
-                fresherItem (blogs);
-            })
+// function handleDelete(id) {
+//     fetch(urlBlog + '/' + id, { method: 'DELETE', })
+//         .then(res => res.json())
+//         .then(res => {
+//             //update DOM
+//             // console.log(res)
+//             // let blogItem = document.querySelector('.blog-item-' + id);
+//             // console.log(blogItem);
+//             // if (blogItem) {
+//             //     blogItem.remove();
+//             // }
 
-            
-        });
-}
+//             //call API 
+//             getBlog(function(blogs) {
+//                 renderBlog(blogs);
+//                 fresherItem (blogs);
+//         })
+//     });
+// }
 
 ///////////////////
 function handleEditForm(id) {
     document.querySelector('input[name="title"]').value = document.querySelector('.item-title-'+id).textContent;
     document.querySelector('input[name="content"]').value = document.querySelector('.item-content-'+id).textContent;
     document.querySelector('input[name="createAt"]').value = document.querySelector('.item-createAt-'+id).textContent;
-    // document.querySelector('input[name="image"]').value = document.querySelector('.item-image-'+id).src;
+    document.querySelector('input[name="image"]').value = document.querySelector('.item-image-'+id).src;
 
     // Lấy Btn Element và đổi tên hiển thị thành "Save"+********
    let createBtn = document.querySelector('#create');
@@ -457,35 +459,56 @@ function handleEditForm(id) {
             document.querySelector('input[name="content"]').value = "";
             document.querySelector('input[name="createAt"]').value = "";
             document.querySelector('input[name="image"]').value = "";
-
-            loader.style.display = 'block';
+          
             //Call API
             getBlog(function(blogs) {
-                loader.style.display = 'block';
                 renderBlog(blogs);
                 fresherItem (blogs);
             })
-            loader.style.display = 'block';
+         
             // Gọi lại hàm handleCreateForm để trả lại chức năng cho nút "Create"
             handleCreateForm()
         })
     }
 }
 
-function handleDetails(id,image) {
-    (document.querySelector('input[name="title"]').value) = document.querySelector('.item-title-'+id).textContent;
-    document.querySelector('input[name="content"]').value = document.querySelector('.item-content-'+id).textContent;
-    document.querySelector('input[name="createAt"]').value = document.querySelector('.item-createAt-'+id).textContent;
-    document.querySelector('input[name="image"]').value = document.querySelector('.item-image-'+id).src;
-    document.querySelector('input[name="image"]').style.display = 'none';
-    document.querySelector('.pic').style.display = 'block';
-    document.querySelector('.pic').src = document.querySelector('.item-image-'+id).src;
+let details = document.querySelector('.details');
+function handleDetails(id) {
+    fetch(urlBlog + '/' + id)
+        .then(res=> res.json())
+        .then(blog=> {
+            let { id, title, content, createdAt, image } = blog;
+            let date = new Date(createdAt);
+            let dateFull = date.getMonth() + '/' + date.getDate() + '/' + date.getFullYear() + " " +
+                date.getHours() + ":" + date.getMinutes()
 
-    // Lấy Btn Element và đổi tên hiển thị thành "Save"+********
-   let createBtn = document.querySelector('#create').disabled ;
-   let formTitle = document.querySelector('.form-title');
+           let dataDetail
+          dataDetail = ` 
+           <div class="blog-detail-${id}">
+               <div><label class=lable>Title</label>: ${id}</div>
+               <div class="item-title-${id}"><label class=lable>Title</label>: ${title}</div>
+               <div class="item-content-${id}"><label class=lable>Content</label>: ${content}</div>
+               <div class="item-createAt-${id}"><label class=lable>Created At</label>: ${dateFull}</div>
+               <div class="imageDetail" ><label class=lable>Pictures</label>: <img class="item-image-${id} img-detail" src=${image}/></div>
+           </div> `
+           details.innerHTML = dataDetail
+        })
+//     document.querySelector('input[name="title"]').value = document.querySelector('.item-title-'+id).textContent;
+//     document.querySelector('input[name="content"]').value = document.querySelector('.item-content-'+id).textContent;
+//     document.querySelector('input[name="createAt"]').value = document.querySelector('.item-createAt-'+id).textContent;
+//     document.querySelector('input[name="image"]').value = document.querySelector('.item-image-'+id).src;
+//     document.querySelector('input[name="image"]').style.display = 'none';
+//     document.querySelector('.pic').style.display = 'block';
+//     document.querySelector('.pic').src = document.querySelector('.item-image-'+id).src;
 
-    formTitle.textContent = "Details";
+//     // Lấy Btn Element và đổi tên hiển thị thành "Save"+********
+//    let createBtn = document.querySelector('#create').disabled ;
+//    let formTitle = document.querySelector('.form-title');
+
+//     formTitle.textContent = "Details";
 
 }
+handleDelete()
+
+ export { getBlog, urlBlog, renderBlog, fresherItem } 
 
