@@ -122,7 +122,7 @@ function pagination() {
 
     btnNext.addEventListener('click', function() {
         totalPage = Math.ceil((blogs.length / perPage))
-        if (currentPage >= totalPage) {
+        if (currentPage + 1 >= totalPage) {
             currentPage = totalPage;
             caculateLast()
         } else {
