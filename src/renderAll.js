@@ -1,6 +1,7 @@
 import { getData, postData, deleteData, putData, detailData } from './callAPI.js';
 
 let loader = document.querySelector('.loader');
+
 let page = document.querySelector('.page');
 let btnReload = document.querySelector('.reload');
 let btnNext = document.querySelector('.btn-next');
@@ -287,7 +288,6 @@ function handleDetail() {
     btnDetail.forEach(function(item) {
         let detailId = item.getAttribute("data-detail");
         item.addEventListener("click", function() {
-            console.log("d");
             detailData(detailId)
                 .then(res => {
                     if (res.id == detailId) {
