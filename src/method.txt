@@ -1,0 +1,130 @@
+let loader = document.querySelector('.loader');
+
+export class method {
+    constructor(url, data = {}) {
+        this.url = url;
+        this.data = data;
+    }
+
+    //Gets method 
+    get() {
+        loader.classList.add('active');
+        new Promise(function(resolve, reject) {
+            fetch(this.url)
+                .then(res => res.json())
+                .then(callback)
+                .catch((err) => {
+                    console.log(err);
+                })
+        })
+    };
+
+    //Post method
+    post() {
+        let options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.data)
+        };
+
+        return new Promise((resolve, reject) => {
+            fetch(this.url, options)
+                .then(res => {
+                    res.json()
+                        .then((item) => {
+                            if (res.status == 201) {
+                                console.log(item);
+                                return item;
+                            } else {
+                                return reject(new Error('Error'))
+                            }
+                        })
+                })
+                .catch((err) => {
+                    console.log(err);
+                })
+        })
+    };
+
+    //Put method
+    put(id, data, callback) {
+        let options = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.data)
+        };
+        return new Promise((resolve, reject) => {
+            fetch(this.url, options)
+                .then(res => {
+                    res.json()
+                        .then((item) => {
+                            if (res.status == 200) {
+                                console.log(item);
+                                return item
+                            } else {
+                                return reject(new Error('Error'))
+                            }
+                        })
+                })
+                .catch((err) => {
+                    console.log(err);
+                })
+        })
+    };
+
+    //Delete method for
+    delete(id) {
+        var options = {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+        return new Promise((resolve, reject) => {
+            fetch(this.url, options)
+                .then(res => {
+                    res.json()
+                        .then((item) => {
+                            if (res.status == 200) {
+                                console.log(item);
+                                return item
+                            } else {
+                                return reject(new Error('Error'))
+                            }
+                        })
+                })
+                // .then(function () {
+                //     renderPage()
+                // })
+                .catch((err) => {
+                    console.log(err);
+                })
+        })
+    };
+
+    //Get method 
+    detail(callback) {
+        //return new Promise(function(resolve, reject) {
+        fetch(this.url)
+            .then(res => {
+                res.json()
+                    .then((item) => {
+                        if (res.status == 200) {
+                            console.log(item);
+                            return callback(item);
+                        } else {
+                            return reject(new Error('Error'))
+                        }
+                    })
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+            // })
+    };
+
+};

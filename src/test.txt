@@ -1,0 +1,213 @@
+var select = document.getElementById("ddlViewBy");
+
+export class http {
+  constructor(url, obj = {}) {
+    this.url = url;
+    this.obj = obj;
+    this.convert = function (data) {
+      return Object.keys(data)
+        .map(
+          (key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`
+        )
+        .join("&");
+    };
+  };
+
+  // post method
+  post() {
+    var option = {
+      method: "POST",
+      body: JSON.stringify(this.obj),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    return new Promise((resolve, reject) => {
+      fetch(this.url, option)
+        .then((res) => {
+          res.json().then((item) => {
+            if (res.status == 200) {
+              return callback(item);
+            } else {
+              reject("error");
+            }
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    });
+  }
+
+  // get method
+  get(callback,page='' ,str='') {
+    return new Promise((resolve, reject) => {
+      fetch(this.url + this.convert(this.obj) + `?_page=${page}&_limit=${str}`)
+        .then((res) => {
+          res.json().then((data) => {
+            if (res.status == 200) {
+              return callback(data);
+            } else {
+              reject("ko thanh cong");
+            }
+          });
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    });
+  }
+
+  // delete method
+  delete(id, callback) {
+    var option = {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    return new Promise((resolve, reject) => {
+      fetch(`${this.url}${id}` + this.convert(this.obj), option)
+        .then((res) => {
+          // console.log(res);
+
+          res.json().then((item) => {
+            if (res.status == 200) {
+              return callback(item);
+            } else {
+              reject("error");
+            }
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    });
+  }
+
+  // put method
+  update(id, data, callback) {
+    var option = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+
+    return new Promise((resolve, reject) => {
+      fetch(this.url + id + this.convert(data), option)
+        .then((res) => {
+          return res.json().then((item) => {
+            if (res.status == 200) {
+             callback(item);
+            } else {
+              reject("error");
+            }
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    });
+  }
+}
+
+////////////////////////////////
+
+import format from "./format.js";
+import { http } from "./getdata.js";
+
+
+var container = document.querySelector(".container_table");
+var title = document.querySelector('input[name="title"]');
+var content = document.querySelector('textarea[name="content"]');
+var update__btn = document.getElementById("update_btn");
+var creat =document.getElementById("create_btn")
+
+
+var date = new Date();
+update__btn.style.display="none";
+
+
+function render(arr) {
+  var html = arr.map((i) => {
+    return `  <tr>
+        <td class="text__data__table"><h1 class="">${i.id}</h1></td>
+        <td class="text__data__table"><h1 class=""> ${i.title}</h1></td>
+        <td class="text__data__table"> ${i.content}</td>
+        <td class="text__data__table"><p class="">${format(
+          i.createdAt
+        )}</p></td>
+        <td class="text__data__table text-white cursor-pointer px-[20px] py-[20px]">
+        <a id="${i.id}" title="${i.title}" content="${
+      i.content
+    }" class="btn__handle xoa">Xoá</a>
+        <a id="${i.id}" title="${i.title}" content="${
+      i.content
+    }" class="btn__handle sua">Sửa</a></td>
+        </tr>`;
+  });
+
+  container.innerHTML = html.join("");
+
+  var handleCilck_delete = document.querySelectorAll(".xoa");
+  var handleClick_update = document.querySelectorAll(".sua");
+
+
+
+
+  // delete
+  handleCilck_delete.forEach((i) => {
+
+    i.onclick = (e) => {
+
+      var obj = {
+        title: e.target.title,
+        content: e.target.content,
+      };
+      const api = new http(`http://localhost:3000/Blog/${e.target.id}?`, obj);
+
+      api.delete(e.target.id);
+    };
+  });
+
+
+
+
+
+  // update
+  handleClick_update.forEach((i) => {
+    i.onclick = (e) => {
+      e.preventDefault();
+
+      creat.style.display="none";
+      update__btn.style.display="inline-block";
+      var obj = {
+        title: e.target.title,
+        content: e.target.content,
+      };
+
+      const api = new http(`http://localhost:3000/Blog/${e.target.id}?`,obj);    
+      api.get((item) => {
+        title.value = item.title;
+        content.value = item.content;
+
+        update__btn.addEventListener("click", (event) => {
+          event.preventDefault();
+          var article = {
+            title: title.value,
+            createdAt: date.toLocaleString(),
+            content: content.value,
+          };
+          api.update(e.target.id,article)
+        });
+
+
+      });
+    };
+  });
+}
+
+export default render;
